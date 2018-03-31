@@ -120,26 +120,32 @@ static uint16_t CRC_CCITT(const uint8_t* data, size_t n) {
 // SdSpiCard member functions
 //------------------------------------------------------------------------------
 bool SdSpiCard::begin(SdSpiDriver* spi, uint8_t csPin, SPISettings settings) {
+    preBegin(spi, csPin);
+    return postBegin(settings, SD_INIT_TIMEOUT);
+}
+
+void SdSpiCard::preBegin(SdSpiDriver* spi, uint8_t csPin) {
   m_spiActive = false;
   m_errorCode = SD_CARD_ERROR_NONE;
   m_type = 0;
   m_spiDriver = spi;
-  uint16_t t0 = curTimeMS();
-  uint32_t arg;
-
   m_spiDriver->begin(csPin);
   m_spiDriver->setSpiSettings(SD_SCK_HZ(250000));
   spiStart();
-
   // must supply min of 74 clock cycles with CS high.
   spiUnselect();
   for (uint8_t i = 0; i < 10; i++) {
     spiSend(0XFF);
   }
   spiSelect();
+}
+
+bool SdSpiCard::postBegin(SPISettings settings, uint16_t timeout = SD_INIT_TIMEOUT) {
+  uint32_t arg;
+  uint16_t t0 = curTimeMS();
   // command to go idle in SPI mode
   while (cardCommand(CMD0, 0) != R1_IDLE_STATE) {
-    if (isTimedOut(t0, SD_INIT_TIMEOUT)) {
+    if (isTimedOut(t0, timeout)) {
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
@@ -163,7 +169,7 @@ bool SdSpiCard::begin(SdSpiDriver* spi, uint8_t csPin, SPISettings settings) {
       type(SD_CARD_TYPE_SD2);
       break;
     }
-    if (isTimedOut(t0, SD_INIT_TIMEOUT)) {
+    if (isTimedOut(t0, timeout)) {
       error(SD_CARD_ERROR_CMD8);
       goto fail;
     }
@@ -173,7 +179,7 @@ bool SdSpiCard::begin(SdSpiDriver* spi, uint8_t csPin, SPISettings settings) {
 
   while (cardAcmd(ACMD41, arg) != R1_READY_STATE) {
     // check for timeout
-    if (isTimedOut(t0, SD_INIT_TIMEOUT)) {
+    if (isTimedOut(t0, timeout)) {
       error(SD_CARD_ERROR_ACMD41);
       goto fail;
     }

@@ -59,6 +59,11 @@ class SdSpiCard {
    * \return The number of 512 byte data blocks in the card
    *         or zero if an error occurs.
    */
+
+  void preBegin(SdSpiDriver* spi, uint8_t csPin);
+
+  bool postBegin(SPISettings settings, uint16_t timeout);
+
   uint32_t cardSize();
   /** Erase a range of blocks.
    *
