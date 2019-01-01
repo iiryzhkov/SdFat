@@ -142,14 +142,13 @@ void SdSpiCard::preBegin(SdSpiDriver* spi, uint8_t csPin) {
 
 bool SdSpiCard::postBegin(SPISettings settings, uint16_t timeout = SD_INIT_TIMEOUT) {
   uint32_t arg;
-  uint16_t t0 = curTimeMS();
+  unsigned long t0 = curTimeMS();
   // command to go idle in SPI mode
   while (cardCommand(CMD0, 0) != R1_IDLE_STATE) {
     if (isTimedOut(t0, timeout)) {
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
-    delayMS(SD_CMD0_DELAY);
   }
 #if USE_SD_CRC
   if (cardCommand(CMD59, 1) != R1_IDLE_STATE) {
@@ -170,7 +169,7 @@ bool SdSpiCard::postBegin(SPISettings settings, uint16_t timeout = SD_INIT_TIMEO
       type(SD_CARD_TYPE_SD2);
       break;
     }
-    if (isTimedOut(t0, timeout)) {
+    if (isTimedOut(t0, SD_INIT_TIMEOUT)) {
       error(SD_CARD_ERROR_CMD8);
       goto fail;
     }
@@ -180,7 +179,7 @@ bool SdSpiCard::postBegin(SPISettings settings, uint16_t timeout = SD_INIT_TIMEO
 
   while (cardAcmd(ACMD41, arg) != R1_READY_STATE) {
     // check for timeout
-    if (isTimedOut(t0, timeout)) {
+    if (isTimedOut(t0, SD_INIT_TIMEOUT)) {
       error(SD_CARD_ERROR_ACMD41);
       goto fail;
     }
@@ -321,7 +320,7 @@ bool SdSpiCard::isBusy() {
   return rtn;
 }
 //------------------------------------------------------------------------------
-bool SdSpiCard::isTimedOut(uint16_t startMS, uint16_t timeoutMS) {
+bool SdSpiCard::isTimedOut(unsigned long startMS, uint16_t timeoutMS) {
 #if WDT_YIELD_TIME_MICROS
   static uint32_t last;
   if ((micros() - last) > WDT_YIELD_TIME_MICROS) {
@@ -374,7 +373,7 @@ bool SdSpiCard::readData(uint8_t* dst, size_t count) {
   uint16_t crc;
 #endif  // USE_SD_CRC
   // wait for start block token
-  uint16_t t0 = curTimeMS();
+  unsigned long t0 = curTimeMS();
   while ((m_status = spiReceive()) == 0XFF) {
     if (isTimedOut(t0, SD_READ_TIMEOUT)) {
       error(SD_CARD_ERROR_READ_TIMEOUT);
@@ -512,7 +511,7 @@ fail:
 //------------------------------------------------------------------------------
 // wait for card to go not busy
 bool SdSpiCard::waitNotBusy(uint16_t timeoutMS) {
-  uint16_t t0 = curTimeMS();
+  unsigned long t0 = curTimeMS();
 #if WDT_YIELD_TIME_MICROS
   // Call isTimedOut first to insure yield is called.
   while (!isTimedOut(t0, timeoutMS)) {

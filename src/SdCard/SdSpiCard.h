@@ -262,7 +262,7 @@ class SdSpiCard {
     return cardCommand(cmd, arg);
   }
   uint8_t cardCommand(uint8_t cmd, uint32_t arg);
-  bool isTimedOut(uint16_t startMS, uint16_t timeoutMS);
+  bool isTimedOut(unsigned long startMS, uint16_t timeoutMS);
   bool readData(uint8_t* dst, size_t count);
   bool readRegister(uint8_t cmd, void* buf);
 
