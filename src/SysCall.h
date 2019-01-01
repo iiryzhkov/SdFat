@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 20011-2017 Bill Greiman
+ * Copyright (c) 2011-2018 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -36,22 +36,27 @@
 #else  // defined(ARDUINO)
 #error "Unknown system"
 #endif  // defined(ARDUINO)
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #ifdef ESP8266
 // undefine F macro if ESP8266.
 #undef F
 #endif  // ESP8266
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #ifndef F
 /** Define macro for strings stored in flash. */
 #define F(str) (str)
 #endif  // F
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** \return the time in milliseconds. */
 inline uint16_t curTimeMS() {
   return millis();
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/** Delay milliseconds */
+inline void delayMS(uint16_t ms) {
+  delay(ms);
+}
+//------------------------------------------------------------------------------
 /**
  * \class SysCall
  * \brief SysCall - Class to wrap system calls.

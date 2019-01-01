@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 20011-2017 Bill Greiman
+ * Copyright (c) 2011-2018 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -149,6 +149,7 @@ bool SdSpiCard::postBegin(SPISettings settings, uint16_t timeout = SD_INIT_TIMEO
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
+    delayMS(SD_CMD0_DELAY);
   }
 #if USE_SD_CRC
   if (cardCommand(CMD59, 1) != R1_IDLE_STATE) {
@@ -214,7 +215,7 @@ uint8_t SdSpiCard::cardCommand(uint8_t cmd, uint32_t arg) {
     spiStart();
   }
   // wait if busy
-  waitNotBusy(SD_WRITE_TIMEOUT);
+  waitNotBusy(SD_CMD_TIMEOUT);
 
 #if USE_SD_CRC
   // form message
@@ -549,7 +550,7 @@ bool SdSpiCard::writeBlock(uint32_t blockNumber, const uint8_t* src) {
 #if CHECK_FLASH_PROGRAMMING
   // wait for flash programming to complete
   if (!waitNotBusy(SD_WRITE_TIMEOUT)) {
-    error(SD_CARD_ERROR_WRITE_TIMEOUT);
+    error(SD_CARD_ERROR_FLASH_PROGRAMMING);
     goto fail;
   }
   // response is r2 so get and check two bytes for nonzero
