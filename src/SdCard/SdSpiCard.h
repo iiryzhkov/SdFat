@@ -59,6 +59,10 @@ class SdSpiCard {
    * \return The number of 512 byte sectors in the card
    *         or zero if an error occurs.
    */
+  
+  void preBegin(SdSpiDriver* spi, uint8_t csPin);
+  bool postBegin(SPISettings settings, uint16_t timeout);
+  
   uint32_t cardCapacity();
   /** \return Card size in sectors or zero if an error occurs. */
   uint32_t cardSize() {return cardCapacity();}
@@ -263,7 +267,7 @@ class SdSpiCard {
     return cardCommand(cmd, arg);
   }
   uint8_t cardCommand(uint8_t cmd, uint32_t arg);
-  bool isTimedOut(uint16_t startMS, uint16_t timeoutMS);
+  bool isTimedOut(unsigned long startMS, uint16_t timeoutMS);
   bool readData(uint8_t* dst, size_t count);
   bool readRegister(uint8_t cmd, void* buf);
 

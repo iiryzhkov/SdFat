@@ -338,6 +338,14 @@ class SdFat : public SdFileSystem<SdSpiCard> {
    */
   bool cardBegin(uint8_t csPin = SS, SPISettings settings = SPI_FULL_SPEED) {
     return m_card.begin(&m_spi, csPin, settings);
+  } 
+
+  void cardPreBegin(uint8_t csPin = SS) {
+    m_card.preBegin(&m_spi, csPin);
+  }
+
+  bool cardPostBegin(SPISettings settings = SPI_FULL_SPEED, uint16_t timout = SD_INIT_TIMEOUT) {
+    return m_card.postBegin(settings, timout);
   }
   /** Initialize file system for diagnostic use only.
    * \return true for success else false.
